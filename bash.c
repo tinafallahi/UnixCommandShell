@@ -2,8 +2,28 @@
 
 int main()
 {
+	// Read in the profile file before starting the command line.
+	// For now the PATH and HOME are printed. 
 	startup();
 	printf("PATH: %sHOME: %s\n", PATH, HOME);
+	// Starts the command line with printing the current working 
+	// directory and moving to a new line when character '\n' is 
+	// reached. For the time being the line is printed. 
+	char endOfLine = '\n';
+	char line[128];
+	while(endOfLine == '\n'){
+		char cwd[1024];
+        if (getcwd(cwd, sizeof cwd) != NULL) {
+        	printf("%s>", cwd);
+			fgets (line, sizeof line, stdin);
+			endOfLine = line[strlen(line)-1];
+			printf("%s", line);	
+        }
+        else {
+        	perror("Could not get the current working directory:");
+        	exit(EXIT_FAILURE);
+        }
+	}
     return 0;
 }
 
