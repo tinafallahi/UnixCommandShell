@@ -7,3 +7,4 @@ char PATH[128];
 char HOME[128];
 
 void startup();
+void getProgramNameAndArgs(char array[]);
