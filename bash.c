@@ -6,7 +6,6 @@ int main()
 	// Read in the profile file before starting the command line.
 	// For now the PATH and HOME are printed. 
 	startup();
-	printf("PATH: %sHOME: %s\n", PATH, HOME);
 	// Starts the command line with printing the current working 
 	// directory and moving to a new line when character '\n' is 
 	// reached. For the time being the line is printed. 
@@ -32,6 +31,35 @@ int main()
     return 0;
 }
 
+void list(char *programName, char *args[] ){
+	// Search through directories listed in PATH. 
+	pid_t pid=fork();
+	if (pid==0) {
+		char *argv[]={programName,args[0],args[1],NULL};
+		execv("/bin/ls",argv);
+	}
+	else {
+		waitpid(pid,0,0);
+	}
+}
+
+void changeDirectory(){
+}
+
+// Function that takes a line read in and changes the PATH and HOME 
+// global variable according to what the content of that line is.
+void setPathAndHome(char line[]){
+	if(!strncmp(line, "PATH=", 5)){
+    		memmove(line, line+5, strlen(line));
+    		strcpy(PATH, line);
+    }
+    if(!strncmp(line, "HOME=", 5)){
+    		memmove(line, line+5, strlen(line));
+    		strcpy(HOME, line);
+    }
+    printf("PATH: %sHOME: %s\n", PATH, HOME);
+}
+
 // This function gets the program name from the command line and 
 // two arguments(assuming there won't be more than two arguments).
 // according to what the program name is then the correct function 
@@ -39,9 +67,7 @@ int main()
 void getProgramNameAndArgs(char line[]) {
 	int count = 0;
 	char programName[80];
-	char args[2][10];
-	strcpy(args[0], "");
-	strcpy(args[1], "");
+	char args[][80]={"","",""};
 	char *token = strtok (line," ");
 	while (token != NULL) {
 		if(count==0) {
@@ -55,21 +81,21 @@ void getProgramNameAndArgs(char line[]) {
     // Print program name and all the arguments.
     printf("Program name: %s\n", programName);
     int j=0;
-    for(j=0;j<2;j++){
+    for(j=0;j<3;j++){
     	printf("Argument %d: %s\n", j, args[j]);
     }
-    // From here according to what the program name is and what
-    // the arguments are functions must be written. 
-}
-
-void setPathAndHome(char line[]){
-	if(!strncmp(line, "PATH=", 5)){
-    		memmove(line, line+5, strlen(line));
-    		strcpy(PATH, line);
-    }
-    if(!strncmp(line, "HOME=", 5)){
-    		memmove(line, line+5, strlen(line));
-    		strcpy(HOME, line);
+    // According to what the program name is command are executed. 
+    if(!strcmp(programName, "ls")) {
+    	printf("Going into ls.\n");
+    	list(programName, args);
+    } else if (!strcmp(programName, "cd")) {
+    	printf("Going into cd.\n");
+    	//changeDirectory(programName,args);
+    } else if (!(strncmp(programName, "$HOME=", 6) && strncmp(programName, "$PATH=", 6))) {
+    	printf("Going into changing environmental variables.\n");
+    	setPathAndHome(memmove(programName, programName+1, strlen(programName)));
+    } else {
+    	printf("Unrecognised command.\n");
     }
 }
 
