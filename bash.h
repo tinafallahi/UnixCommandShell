@@ -7,11 +7,18 @@
 
 #define MAXARGS 2
 #define MAXLENGTH 1024
+#define PATHMAX 5
+#define FILENAME "profile.txt"
 
-char PATH[5][1024] = {"","","","",""};
-char HOME[1024];
+char PATH[MAXLENGTH];
+char PATHS[PATHMAX][MAXLENGTH];
+char HOME[MAXLENGTH];
 
-void startup();
 void setPathAndHome(char line[]);
-int getProgramNameAndArgs(char array[]);
+void startup();
 char* searchBinary(char *folder, char *programName);
+char* searchBinaries(char *programName);
+void executeBinary(char *filePath, char *programName, char *args[]);
+void changeDirectory(char *args[]);
+void writeProfile(char *programName);
+int getProgramNameAndArgs(char array[]);
