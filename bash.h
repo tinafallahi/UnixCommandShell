@@ -5,6 +5,9 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#define MAXARGS 2
+#define MAXLENGTH 1024
+
 char PATH[5][1024] = {"","","","",""};
 char HOME[1024];
 

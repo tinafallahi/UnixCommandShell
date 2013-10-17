@@ -9,9 +9,9 @@ int main()
 	// directory and moving to a new line when character '\n' is 
 	// reached. For the time being the line is printed.
 	char endOfLine = '\n';
-	char line[1024];
+	char line[MAXLENGTH];
 	while(endOfLine == '\n'){
-		char cwd[1024];
+		char cwd[MAXLENGTH];
         if (getcwd(cwd, sizeof cwd) != NULL) {
         	printf("%s>", cwd);
 			fgets (line, sizeof line, stdin);
@@ -56,7 +56,7 @@ void setPathAndHome(char line[]){
 void startup(){
 	// TODO: Change the file extension.  
 	char fileName[] = "profile.txt";
-    char line [1024];
+    char line [MAXLENGTH];
     FILE *file;
 
     file = fopen(fileName,"r");
@@ -127,9 +127,12 @@ char* searchBinaries(char *programName){
 // Forks the parent process and executes the correct binary.
 // TODO: Make arguments work.
 void executeBinary(char *filePath, char *programName, char *args[]){
-    printf("Executing: %s\n", programName);
-    //printf("%s\n", args[0]);
-    //printf("%s\n", args[1]);
+    int i = 0;
+    for(i=0; i<MAXARGS; i++) {
+        if(!strcmp(args[i],"")){
+            args[i] = NULL;
+        }
+    }
 	pid_t pid=fork();
 	if (pid==0) {
 		char *argv[]={programName,args[0],args[1],NULL};
@@ -146,10 +149,15 @@ void executeBinary(char *filePath, char *programName, char *args[]){
 // will be called and executed. 
 // For now prints which one of the three states it enters.
 // TODO: Check why somethings don't work the first time around for fullPath.
+// TODO: See about how many arguments there can be.
 int getProgramNameAndArgs(char line[]) {
 	int count = 0;
-	char programName[80]="";
-	char args[][80]={"","",""};
+	char programName[MAXLENGTH]="";
+	char *args[MAXARGS];
+    int i = 0;
+    for(i=0; i<MAXARGS; i++) {
+        args[i] = malloc(MAXLENGTH);
+    } 
 	char *token = strtok (line," ");
 	while (token != NULL) {
 		if(count==0) {
@@ -163,7 +171,7 @@ int getProgramNameAndArgs(char line[]) {
     // Print program name and all the arguments.
     printf("Program name: %s\n", programName);
     int j=0;
-    for(j=0;j<3;j++){
+    for(j=0;j<2;j++){
     	printf("Argument %d: %s\n", j, args[j]);
     }
     // According to what the program name is command are executed.
