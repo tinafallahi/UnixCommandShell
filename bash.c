@@ -1,5 +1,6 @@
 #include "bash.h"
 
+// TODO: Change some of the arrays to pointers instead with malloc. 
 int main()
 {
 	// Read in the profile file before starting the command line.
@@ -149,7 +150,6 @@ void executeBinary(char *filePath, char *programName, char *args[]){
 
 // Executing cd according to what the arguments are.
 void changeDirectory(char *args[]) {
-    // If no arguments then change directory to home.
     int i = 0;
     int count=0;
     for(i = 0; i<MAXARGS; i++) {
@@ -159,18 +159,19 @@ void changeDirectory(char *args[]) {
         }
     }
     if(count == MAXARGS) {
+        // If no arguments then change directory to home.
         if(chdir(HOME) == -1) {
             perror("Failed to find HOME directory:");
             exit(EXIT_FAILURE);
         }
+    } else {
+        // If any arguments then go to the correct directory.
+        chdir(args[0]);
     }
-    // If any arguments then go up if .. and go 
-    // to a different directory if name provided exists.
 
 }
 
-// Opens the profile file and changes the PATH and HOME. 
-// TODO: warning about the '\0', see how this can be removed.
+// Opens the profile file and changes the PATH and HOME.
 void writeProfile(char *programName) {
     FILE *file;
     if( file == NULL ) {
@@ -216,13 +217,11 @@ int getProgramNameAndArgs(char line[]) {
     // According to what the program name is command are executed.
     // Directory needs to be changed.
     if (!strcmp(programName, "cd")) {
-    	printf("Going into cd.\n");
         changeDirectory(args);
     	return 0;
     }
     // Environmental variables need to be changed.
     if (!(strncmp(programName, "$HOME=", 6) && strncmp(programName, "$PATH=", 6))) {
-    	//printf("Going into changing environmental variables.\n");
     	setPathAndHome(memmove(programName, programName+1, strlen(programName)));
     	writeProfile(programName);
     	return 0;
@@ -230,7 +229,6 @@ int getProgramNameAndArgs(char line[]) {
     // Checking if a binary for this program name exists.
     char *fullPath = searchBinaries(programName);
     if(strcmp(fullPath,"")){
-    	//printf("In binary execution for: %s\n", fullPath);
     	executeBinary(fullPath, programName, args);
     	return 0;
     }
