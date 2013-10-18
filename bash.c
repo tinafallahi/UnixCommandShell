@@ -4,11 +4,10 @@
 int main()
 {
 	// Read in the profile file before starting the command line.
-	// For now the PATH and HOME are printed. 
 	startup();
-	// Starts the command line with printing the current working 
+	// Strts the command line with printing the current working 
 	// directory and moving to a new line when character '\n' is 
-	// reached. For the time being the line is printed.
+	// reached.
 	char endOfLine = '\n';
 	char line[MAXLENGTH];
 	while(endOfLine == '\n'){
@@ -46,7 +45,6 @@ void setPathAndHome(char line[]){
         }
 		memmove(line, line+5, strlen(line));
         strcpy(PATH, line);
-        printf("**%s\n", line);
 		char *token = strtok (line,":");
 		int count = 0;
 		while (token != NULL) {
@@ -55,21 +53,17 @@ void setPathAndHome(char line[]){
     		count++;
     	}
     }
-    printf("HOME: %s\n", HOME);
-    printf("PATH: %s\n", PATH);
-    printf("PATH1:%s PATH2:%s PATH3:%s\n", PATHS[0], PATHS[1], PATHS[2]);
 }
 
 // Reading the profile file and storing PATH and HOME variable.
 void startup(){
-	// TODO: Change the file extension.
     char line [MAXLENGTH];
     FILE *file;
 
     file = fopen(FILENAME,"r");
  
     if( file == NULL ) {
-    	perror("Error while opening the file:\n");
+    	perror("Error while opening the profile file:\n");
     	exit(EXIT_FAILURE);
     }
  
@@ -111,7 +105,8 @@ char* searchBinary(char *folder, char *programName){
   		return result;
 	} 
 	else {
-		printf("Cannot open the PATH directory %s.", folder);
+		perror("Cannot open the PATH directory.");
+        exit(EXIT_FAILURE);
 	}
 }
 
@@ -140,6 +135,8 @@ void executeBinary(char *filePath, char *programName, char *args[]){
     }
 	pid_t pid=fork();
 	if (pid==0) {
+        // If MAXARGS is changed then this line needs to be modified as well.
+        // TODO: Ask if I should even consider a different case!
 		char *argv[]={programName,args[0],args[1],NULL};
 		execv(filePath,argv);
 	}
@@ -166,16 +163,19 @@ void changeDirectory(char *args[]) {
         }
     } else {
         // If any arguments then go to the correct directory.
-        chdir(args[0]);
+        if(chdir(args[0]) == -1) {
+            printf("Failed to find %s directory\n", args[0]);
+        }
     }
 
 }
 
 // Opens the profile file and changes the PATH and HOME.
+// TODO: Ask if multiple which one needs to be written.
 void writeProfile(char *programName) {
     FILE *file;
     if( file == NULL ) {
-        perror("Error while opening the file:\n");
+        perror("Error while opening the profile file:\n");
         exit(EXIT_FAILURE);
     }
     char line [MAXLENGTH];
@@ -185,10 +185,9 @@ void writeProfile(char *programName) {
 }
 
 // This function gets the program name from the command line and 
-// two arguments(assuming there won't be more than two arguments).
-// according to what the program name is then the correct function 
-// will be called and executed. 
-// For now prints which one of the three states it enters.
+// two arguments(if the number needs to be changed MAXARGS variable 
+// can be changed). According to what the program name is then the 
+// correct function will be called and executed. 
 // TODO: Check why somethings don't work the first time around for fullPath.
 int getProgramNameAndArgs(char line[]) {
 	int count = 0;
@@ -207,12 +206,6 @@ int getProgramNameAndArgs(char line[]) {
     	}
     	token = strtok (NULL, " ");
     	count ++;
-    }
-    // Print program name and all the arguments.
-    printf("Program name: %s\n", programName);
-    int j=0;
-    for(j=0;j<2;j++){
-    	printf("Argument %d: %s\n", j, args[j]);
     }
     // According to what the program name is command are executed.
     // Directory needs to be changed.
